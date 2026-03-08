@@ -1,0 +1,320 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[margin=0.9in]{geometry}
+\usepackage{fancyhdr}
+\usepackage{graphicx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{booktabs}
+\usepackage{caption}
+
+% Configure listings for code display
+\definecolor{codegreen}{rgb}{0,0.6,0}
+\definecolor{codegray}{rgb}{0.5,0.5,0.5}
+\definecolor{codepurple}{rgb}{0.58,0,0.82}
+\definecolor{backcolour}{rgb}{0.95,0.95,0.92}
+
+\lstdefinestyle{mystyle}{
+    backgroundcolor=\color{backcolour},
+    commentstyle=\color{codegreen},
+    keywordstyle=\color{codepurple},
+    numberstyle=\tiny\color{codegray},
+    stringstyle=\color{codepurple},
+    basicstyle=\ttfamily\footnotesize,
+    breakatwhitespace=false,
+    breaklines=true,
+    captionpos=b,
+    keepspaces=true,
+    numbers=left,
+    numbersep=5pt,
+    showspaces=false,
+    showstringspaces=false,
+    showtabs=false,
+    tabsize=2
+}
+
+\lstset{style=mystyle}
+
+% Configure header and footer
+\pagestyle{fancy}
+\fancyhf{}
+\rhead{SPE Mini Project}
+\lhead{Scientific Calculator}
+\cfoot{\thepage}
+
+\title{\huge\textbf{Scientific Calculator} \\ \Large\textit{Mini Project Report}}
+\author{Rahul Raman(MT2025100)}
+\date{\today}
+
+\begin{document}
+
+\maketitle
+
+\newpage
+
+\section{Project Overview}
+
+\subsection{Introduction}
+This report documents the development and deployment pipeline of a \textbf{Scientific Calculator} application built in Java. The project demonstrates a complete software development lifecycle including continuous integration, automated testing, containerization, and infrastructure-as-code deployment strategies.
+
+\textbf{Repository:}\url{https://github.com/rahul09123/SPE-Mini-Project}\newline
+\textbf{Docker Hub :}\url{https://hub.docker.com/r/rahul0129/scientific-calculator}
+
+\begin{center}
+    \includegraphics[width=0.75\textwidth]{Images/Calculator.png}
+    \captionof{figure}{Scientific Calculator Application}
+\end{center}
+
+\subsection{Tech Stack \& Objectives}
+\textbf{Stack:} Java 17, Maven 3, JUnit 5, Jenkins, Docker, Ansible
+
+\textbf{Application:} Command-line scientific calculator with basic arithmetic (add, subtract, multiply, divide) and advanced functions (square root, factorial, logarithm, power) with comprehensive error handling.
+
+\section{Jenkins Pipeline Architecture}
+
+\subsection{Pipeline Overview}
+The Jenkins pipeline automates the complete build, test, and deployment workflow. It follows a declarative pipeline approach, providing clarity and maintainability.
+
+\begin{center}
+    \includegraphics[width=0.85\textwidth]{Images/JenkinsPipeline.png}
+    \captionof{figure}{Jenkins Pipeline Architecture}
+\end{center}
+
+\subsection{ngrok: Exposing Jenkins to GitHub Webhooks}
+Since Jenkins runs locally on a development machine, it is not directly reachable from the public internet. \textbf{ngrok} is used to create a secure public tunnel to the local Jenkins server, enabling GitHub to send webhook events that automatically trigger pipeline builds on every code push.
+
+\subsubsection{How It Works}
+\begin{enumerate}
+    \item Jenkins is started locally and listens on \texttt{http://localhost:8080}.
+    \item ngrok is launched to forward a public HTTPS URL (e.g., \texttt{https://unfended-unexhibited-jude.ngrok-free.dev}) to that local port.
+    \item The generated ngrok URL is registered as a \textbf{GitHub Webhook} under the repository's \textit{Settings → Webhooks} with the payload URL set to \texttt{https://unfended-unexhibited-jude.ngrok-free.dev/github-webhook/}.
+    \item Whenever a commit is pushed to the \texttt{main} branch, GitHub sends an HTTP POST to that URL.
+    \item ngrok forwards the request to the local Jenkins instance, which triggers the declarative pipeline automatically.
+\end{enumerate}
+
+\subsubsection{Key Benefits in This Project}
+\begin{itemize}
+    \item \textbf{No public server required:} Allows full CI/CD automation from a local machine without needing a cloud-hosted Jenkins instance.
+    \item \textbf{Instant feedback loop:} Every \texttt{git push} triggers the complete pipeline (build → test → containerize → deploy) within seconds.
+    \item \textbf{Secure tunnel:} ngrok provides TLS-encrypted HTTPS endpoints, satisfying GitHub's webhook security requirements.
+    \item \textbf{Zero configuration overhead:} A single \texttt{ngrok http 8080} command establishes the tunnel, keeping the setup lightweight.
+\end{itemize}
+
+\begin{center}
+    \includegraphics[width=0.75\textwidth]{Images/ngrok.png}
+    \captionof{figure}{ngrok Tunnel Exposing Local Jenkins to the Internet}
+\end{center}
+
+\begin{center}
+    \includegraphics[width=0.75\textwidth]{Images/webHook.png}
+    \captionof{figure}{GitHub Webhook Configured with ngrok URL}
+\end{center}
+
+\subsection{Pipeline Stages}
+
+\subsubsection{Stage 1: Clone Git}
+\begin{lstlisting}[language=groovy,caption=Clone Git Stage]
+stage('Clone Git') {
+    steps {
+        script {
+            git branch: 'main',
+                credentialsId: 'github_credentials',
+                url: "${GITHUB_REPO_URL}"
+        }
+    }
+}
+\end{lstlisting}
+
+\textbf{Purpose:} Fetches latest source code from GitHub. Authenticates to repository and provides clean workspace for builds.
+
+\subsubsection{Stage 2: Build}
+\begin{lstlisting}[language=groovy,caption=Build Stage]
+stage('Build') {
+    steps {
+        sh 'mvn clean package -DskipTests'
+    }
+}
+\end{lstlisting}
+
+\textbf{Purpose:} Compiles Java source and creates JAR artifact. Tests are skipped here and executed in the Test stage.
+
+\subsubsection{Stage 3: Test}
+\begin{lstlisting}[language=groovy,caption=Test Stage]
+stage('Test') {
+    steps {
+        sh 'mvn test'
+    }
+}
+\end{lstlisting}
+
+\textbf{Purpose:} Executes 47 comprehensive unit tests using JUnit 5 and generates test reports.
+
+\subsubsection{Stage 4: Verify JAR Existence}
+\begin{lstlisting}[language=groovy,caption=Verify JAR Existence Stage]
+stage('Verify JAR Existence') {
+    steps {
+        sh 'ls -lh target/'
+    }
+}
+\end{lstlisting}
+
+\textbf{Purpose:} Verifies successful JAR creation by listing target directory contents.
+
+\subsubsection{Stage 5: Build and Push Docker Image}
+\begin{lstlisting}[language=groovy,caption=Docker Build Stage (Partial)]
+stage('Build and Push Docker Image') {
+    steps {
+        script {
+            sh """
+            docker buildx create --use || true
+            docker buildx inspect --bootstrap
+
+            docker buildx build \
+              --platform linux/amd64,linux/arm64 \
+              -t ${DOCKER_HUB_USERNAME}/${DOCKER_IMAGE_NAME}:latest \
+              --push .
+            """
+        }
+    }
+}
+\end{lstlisting}
+
+\textbf{Purpose:} Builds and pushes multi-platform Docker images (linux/amd64, linux/arm64) to Docker Hub registry.
+
+\begin{center}
+    \includegraphics[width=0.75\textwidth]{Images/DockerHub.png}
+    \captionof{figure}{Docker Hub Multi-Platform Build}
+\end{center}
+
+\subsubsection{Stage 6: Deploy with Ansible}
+\begin{lstlisting}[language=groovy,caption=Ansible Deployment Stage]
+stage('Deploy with Ansible') {
+    steps {
+        sh 'ansible-playbook -i inventory.ini deploy.yml'
+    }
+}
+\end{lstlisting}
+
+\textbf{Purpose:} Automates application deployment to target servers using Ansible playbooks.
+
+\begin{center}
+    \includegraphics[width=0.75\textwidth]{Images/container\ Running.png}
+    \captionof{figure}{Container Running and Deployed}
+\end{center}
+
+\subsection{Environment Variables}
+
+\begin{lstlisting}[language=groovy,caption=Environment Configuration]
+environment {
+    DOCKER_IMAGE_NAME = 'scientific-calculator'
+    GITHUB_REPO_URL = 'https://github.com/rahul09123/SPE-Mini-Project.git'
+    DOCKER_HUB_USERNAME = 'rahul0129'
+    DOCKER_HOST = "unix:///Users/rahulraman/.docker/run/docker.sock"
+}
+\end{lstlisting}
+
+These variables configure: Docker image name, GitHub repository URL, Docker Hub credentials, and Docker daemon socket.
+
+
+\section{Testing and Validation}
+
+\subsection{Test Suite Overview}
+The project includes 47 comprehensive unit tests covering all calculator operations. Tests are organized using JUnit 5's annotation-based approach.
+
+\subsection{Test Coverage}
+
+\subsubsection{Mathematical Operations Tested}
+\begin{itemize}
+    \item \textbf{Square Root:} Positive numbers, zero, decimals, negative numbers
+    \item \textbf{Factorial:} Zero, one, positive integers (up to 20)
+    \item \textbf{Natural Logarithm:} One, Euler's number, positive values, zero, negative values
+    \item \textbf{Power Operations:} Base cases, decimal exponents, edge cases
+\end{itemize}
+
+\subsubsection{Test Sample}
+Tests validate: Square Root ($\sqrt{16} = 4$, $\sqrt{0} = 0$), Factorial ($0! = 1$, $5! = 120$, $20! = 2.4{\times}10^{18}$), Natural Logarithm ($\ln(1) = 0$, $\ln(e) = 1$). Edge cases include NaN handling for negative numbers and infinity for $\ln(0)$. All 47 tests execute in 41 milliseconds with 100\% pass rate.
+
+
+\section{Deployment Configuration}
+
+\subsection{Dockerfile}
+The \texttt{Dockerfile} defines the container image used to package and run the Scientific Calculator application.
+
+\begin{lstlisting}[language=bash,caption=Dockerfile]
+FROM openjdk:17.0.1-jdk-slim
+
+WORKDIR /app
+
+COPY target/SPEMiniProject-1.0-SNAPSHOT.jar app.jar
+
+CMD ["/bin/sh"]
+\end{lstlisting}
+
+\subsubsection{Dockerfile Breakdown}
+\begin{itemize}
+    \item \textbf{Base Image (\texttt{FROM openjdk:17.0.1-jdk-slim}):} Uses a lightweight OpenJDK 17 slim image, providing the Java runtime while keeping the image size minimal.
+    \item \textbf{Working Directory (\texttt{WORKDIR /app}):} Sets \texttt{/app} as the working directory inside the container, ensuring all subsequent operations occur in a predictable path.
+    \item \textbf{Copy JAR (\texttt{COPY}):} Copies the Maven-built JAR artifact \texttt{SPEMiniProject-1.0-SNAPSHOT.jar} into the container and renames it to \texttt{app.jar} for simplicity.
+    \item \textbf{Entry Point (\texttt{CMD ["/bin/sh"]}):} Opens an interactive shell on container start, allowing manual execution of the calculator via \texttt{java -jar app.jar} inside the container.
+\end{itemize}
+
+This image is built for multiple platforms (\texttt{linux/amd64} and \texttt{linux/arm64}) using Docker Buildx in the Jenkins pipeline and published to Docker Hub under \texttt{rahul0129/scientific-calculator:latest}.
+
+\subsection{Ansible Deployment Playbook (deploy.yml)}
+The \texttt{deploy.yml} file automates container deployment to target servers using Ansible orchestration.
+
+\subsubsection{Playbook Structure}
+\begin{lstlisting}[language=yaml,caption=deploy.yml Tasks]
+- name: Pull the latest Docker image
+  shell: docker pull rahul0129/scientific-calculator:latest
+
+- name: Stop and remove existing container
+  shell: docker rm -f calculator
+  ignore_errors: true
+
+- name: Run calculator container (detached)
+  shell: docker run -dit --name calculator \
+    --restart unless-stopped \
+    rahul0129/scientific-calculator:latest
+
+- name: Display container status
+  shell: docker ps -f "name=calculator"
+\end{lstlisting}
+
+\subsubsection{Key Operations}
+\begin{itemize}
+    \item \textbf{Pull Image:} Downloads latest Docker image from Docker Hub
+    \item \textbf{Cleanup:} Removes existing container (non-blocking with \texttt{ignore\_errors})
+    \item \textbf{Deploy:} Launches container in detached mode with auto-restart policy
+    \item \textbf{Verify:} Confirms successful container deployment and status
+\end{itemize}
+
+This playbook targets \texttt{webservers} host group defined in \texttt{inventory.ini}, enabling centralized deployment across multiple servers.
+
+\subsection{Pipeline Execution Flow}
+The Jenkins pipeline executes sequentially through all 6 stages: Clone (fetch code) → Build (Maven compile) → Test (JUnit 5, 47 tests) → Verify (JAR check) → Containerize (Docker multi-platform) → Deploy (Ansible).
+
+\subsection{Quality Assurance \& Benefits}
+\textbf{QA Measures:} Automated testing with 47 test cases, build verification, multi-platform testing, and Infrastructure-as-Code deployment ensure reliability.
+
+\textbf{Benefits:} Complete automation, consistency across environments, scalability to multiple servers, high portability across CPU architectures, and rapid feedback (41ms test execution time).
+
+
+\section{Conclusion}
+
+This project successfully demonstrates a complete CI/CD pipeline implementation with 100\% test success (47/47 passing), fast execution (41ms), and multi-platform Docker containerization. The automated pipeline integrates Git-based version control, Maven-based Java builds, comprehensive JUnit 5 testing, multi-platform Docker image building and pushing, and Ansible-based infrastructure deployment. This comprehensive approach showcases modern DevOps practices combining continuous integration, automated testing, and infrastructure-as-code principles.\vspace{0.3cm}
+
+\begin{center}
+    \includegraphics[width=0.75\textwidth]{Images/JUnit.png}
+    \captionof{figure}{JUnit Test Results}
+\end{center}
+
+\vspace{0.2cm}
+
+\begin{center}
+    \includegraphics[width=0.75\textwidth]{Images/emailNotification.png}
+    \captionof{figure}{Email Notification on Build Status}
+\end{center}
+
+\end{document}
