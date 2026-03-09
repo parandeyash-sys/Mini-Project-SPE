@@ -1,7 +1,5 @@
-FROM openjdk:17.0.1-jdk-slim
-
+FROM eclipse-temurin:17-jdk
 WORKDIR /app
-
 COPY target/SPEMiniProject-1.0-SNAPSHOT.jar app.jar
-
-CMD ["/bin/sh"]
+EXPOSE 8080
+ENTRYPOINT ["java","-jar","app.jar"]
