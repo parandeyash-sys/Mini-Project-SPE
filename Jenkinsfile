@@ -2,11 +2,11 @@ pipeline {
     agent any
     environment {
         DOCKER_IMAGE_NAME = 'scientific-calculator'
-        GITHUB_REPO_URL = 'https://github.com/rahul09123/SPE-Mini-Project.git'
-        DOCKER_HUB_USERNAME = 'rahul0129'
+        GITHUB_REPO_URL = 'https://github.com/parandeyash-sys/Mini-Project-SPE.git'
+        DOCKER_HUB_USERNAME = 'yash140603'
         DOCKER_HOST = "unix:///Users/rahulraman/.docker/run/docker.sock"
     }
-    tools{
+    tools {
         maven 'Maven-3'
     }
     stages {
@@ -14,7 +14,7 @@ pipeline {
             steps {
                 script {
                     git branch: 'main',
-                        credentialsId: 'github_credentials',
+                        credentialsId: 'github_credentials', // Make sure you create/update this in Jenkins
                         url: "${GITHUB_REPO_URL}"
                 }
             }
@@ -60,29 +60,30 @@ pipeline {
             }
         }
     }
+
     post {
-            success {
-                emailext (
-                    subject: " Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    body: "Build completed successfully.\n${env.BUILD_URL}",
-                    to: "rahulraman2603@gmail.com"
-                )
-            }
-
-            unstable {
-                emailext (
-                    subject: " UNSTABLE Build: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    body: "Build is unstable.\n${env.BUILD_URL}",
-                    to: "rahulraman2603@gmail.com"
-                )
-            }
-
-            failure {
-                emailext (
-                    subject: " Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
-                    body: "Build failed.\n${env.BUILD_URL}",
-                    to: "rahulraman2603@gmail.com"
-                )
-            }
+        success {
+            emailext (
+                subject: "Build Successful: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: "Build completed successfully.\n${env.BUILD_URL}",
+                to: "parandeyash@gmail.com"
+            )
         }
+
+        unstable {
+            emailext (
+                subject: "UNSTABLE Build: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: "Build is unstable.\n${env.BUILD_URL}",
+                to: "parandeyash@gmail.com"
+            )
+        }
+
+        failure {
+            emailext (
+                subject: "Build Failed: ${env.JOB_NAME} #${env.BUILD_NUMBER}",
+                body: "Build failed.\n${env.BUILD_URL}",
+                to: "parandeyash@gmail.com"
+            )
+        }
+    }
 }
