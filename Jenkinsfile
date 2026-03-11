@@ -2,9 +2,9 @@ pipeline {
     agent any
 
     environment {
-        DOCKER_IMAGE_NAME = 'scientific-calculator'
-        GITHUB_REPO_URL = 'https://github.com/parandeyash-sys/Mini-Project-SPE.git'
-        DOCKER_HUB_USERNAME = 'yash140603'
+        DOCKER_IMAGE_NAME = "scientific-calculator"
+        DOCKER_HUB_USERNAME = "yash140603"
+        GITHUB_REPO_URL = "https://github.com/parandeyash-sys/Mini-Project-SPE.git"
     }
 
     tools {
@@ -47,14 +47,21 @@ pipeline {
             }
         }
 
+        stage('Docker Login') {
+            steps {
+                withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'DOCKER_USER', passwordVariable: 'DOCKER_PASS')]) {
+                    sh '''
+                    echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+                    '''
+                }
+            }
+        }
+
         stage('Push Docker Image') {
             steps {
-                withCredentials([usernamePassword(credentialsId: 'dockerhub_credentials', usernameVariable: 'USER', passwordVariable: 'PASS')]) {
-                    sh """
-                    echo $PASS | docker login -u $USER --password-stdin
-                    docker push ${DOCKER_HUB_USERNAME}/${DOCKER_IMAGE_NAME}:latest
-                    """
-                }
+                sh """
+                docker push ${DOCKER_HUB_USERNAME}/${DOCKER_IMAGE_NAME}:latest
+                """
             }
         }
 
@@ -81,6 +88,10 @@ pipeline {
                 body: "Build failed.\n${env.BUILD_URL}",
                 to: "parandeyash@gmail.com"
             )
+        }
+
+        always {
+            sh 'docker logout || true'
         }
     }
 }
