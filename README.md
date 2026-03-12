@@ -200,11 +200,4 @@ This project is licensed under the MIT License - see the LICENSE file for detail
 - [ ] Configurable precision settings
 - [ ] Web-based interface
 
-## Authors
 
-- **Your Name** - *Initial work* - [Rahul09123](https://github.com/your-username)
-
-## Acknowledgments
-
-- Built as a mini-project for Software Engineering Principles
-- Inspired by classic scientific calculator functionality
