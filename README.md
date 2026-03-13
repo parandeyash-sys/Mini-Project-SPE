@@ -48,11 +48,8 @@ mvn package
 
 **From Command Line:**
 ```bash
-# Using Maven
-mvn exec:java -Dexec.mainClass="org.example.Main"
-
-# Or run the packaged JAR
-java -jar target/SPEMiniProject-1.0-SNAPSHOT.jar
+docker exec -it calculator /bin/bash
+java -jar /app/app.jar
 ```
 
 ### Interactive Menu
