@@ -97,27 +97,6 @@ Tests cover:
 - Scientific functions with various input ranges
 - Boundary conditions and overflow scenarios
 
-## Project Structure
-
-```
-SPE-Mini-Project/
-├── src/
-│   ├── main/
-│   │   └── java/
-│   │       └── org/
-│   │           └── example/
-│   │               ├── Main.java              # Application entry point
-│   │               └── ScientificCalculator.java # Core calculator logic
-│   └── test/
-│       └── java/
-│           └── org/
-│               └── example/
-│                   └── ScientificCalculatorTest.java # Unit tests
-├── pom.xml                                    # Maven configuration
-├── Dockerfile                                 # Docker configuration
-├── Jenkinsfile                                # CI/CD pipeline
-└── README.md                                  # This file
-```
 
 ## Technologies Used
 
