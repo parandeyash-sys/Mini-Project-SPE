@@ -15,26 +15,6 @@ A command-line scientific calculator built in Java which executes basic arithmet
 - **Power** (x^b) - Raise a number to any power
 
 
-## Installation
-
-1. Clone the repository:
-```bash
-git clone https://github.com/your-username/SPE-Mini-Project.git
-cd SPE-Mini-Project
-```
-
-2. Build the project:
-```bash
-mvn clean compile
-```
-
-3. Package the application:
-```bash
-mvn package
-```
-
-## Usage
-
 ### Run the Application
 
 **From IDE:**
@@ -90,8 +70,6 @@ Enter a number: 25
 ## Testing
 
 The project includes comprehensive unit tests using JUnit 5.
-
-### Run Tests
 
 ```bash
 # Run all tests
@@ -149,15 +127,8 @@ The project includes a Jenkins pipeline (`Jenkinsfile`) that automates:
 
 ## Docker Support
 
-Build and run the application using Docker:
+Build and run the application using Docker
 
-```bash
-# Build Docker image
-docker build -t scientific-calculator .
-
-# Run the container
-docker run -it scientific-calculator
-```
 
 ## Future Enhancements
 
