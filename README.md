@@ -1,10 +1,8 @@
 # Scientific Calculator
 
-A comprehensive command-line scientific calculator built in Java that provides basic arithmetic operations along with advanced mathematical functions.
+A command-line scientific calculator built in Java which executes basic arithmetic operations along with advanced mathematical functions.
 
-## Features
-
-### Basic Operations
+### Operations
 - **Addition** (+) - Add two numbers
 - **Subtraction** (-) - Subtract two numbers  
 - **Multiplication** (*) - Multiply two numbers
@@ -16,10 +14,6 @@ A comprehensive command-line scientific calculator built in Java that provides b
 - **Natural Logarithm** (ln(x)) - Calculate natural logarithm of positive numbers
 - **Power** (x^b) - Raise a number to any power
 
-## Requirements
-
-- Java 17 or higher
-- Maven 3.6 or higher
 
 ## Installation
 
@@ -74,26 +68,18 @@ Enter your choice (1-9):
 
 **Addition:**
 ```
-Enter first number: 5.5
-Enter second number: 3.2
-5.5000 + 3.2000 = 8.7000
+Enter first number: 7
+Enter second number: 3
+7.0000 + 3.0000 = 10.0000
 ```
 
 **Square Root:**
 ```
-Enter a number: 16
-√16.0000 = 4.0000
-```
-
-**Factorial:**
-```
-Enter a non-negative integer: 5
-5! = 120
+Enter a number: 25
+√25.0000 = 5.0000
 ```
 
 ## Error Handling
-
-The calculator includes comprehensive error handling:
 
 - **Invalid Input**: Non-numeric inputs are detected and the user is prompted again
 - **Division by Zero**: Prevents division by zero with clear error messages
