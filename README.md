@@ -15,6 +15,18 @@ A command-line scientific calculator built in Java which executes basic arithmet
 - **Power** (x^b) - Raise a number to any power
 
 
+## Workflow of project
+
+- Developer pushes code to GitHub
+- Jenkins triggers pipeline
+- Apache Maven builds the Java project
+- JUnit runs automated tests
+- Docker builds container image
+- Image pushed to Docker Hub
+- Ansible deploys container
+- Email notification is sent to developer
+
+
 ### Run the Application
 
 **From IDE:**
@@ -114,20 +126,6 @@ SPE-Mini-Project/
 - **JUnit 5** - Unit testing framework
 - **Docker** - Containerization support
 - **Jenkins** - Continuous integration/deployment
-
-## CI/CD Pipeline
-
-The project includes a Jenkins pipeline (`Jenkinsfile`) that automates:
-- Code checkout
-- Build and compilation
-- Unit testing execution
-- JAR file creation
-- Docker image building
-- Deployment using Ansible
-
-## Docker Support
-
-Build and run the application using Docker
 
 
 ## Future Enhancements
